@@ -26,7 +26,6 @@ Assembler variant i grått till höger i kolumnen,
 emscripten stöder bara officiellt SSE1 & SSE2 än så länge (https://emscripten.org/docs/porting/simd.html#compiling-simd-code-targeting-x86-sse-instruction-set), men har implementerat SSE4.2 och AVX 128bit https://github.com/emscripten-core/emscripten/pull/11327
 
 # länkar
+- https://wiki.videolan.org/X264_asm_intro/ ( https://wiki.videolan.org/X264asm/ )
+- https://mailman.videolan.org/pipermail/x264-devel/attachments/20130423/ffd6bfb6/attachment-0001.pdf 
 
-- https://mailman.videolan.org/pipermail/x264-devel/attachments/20130423/ffd6bfb6/attachment-0001.pdf
-- https://wiki.videolan.org/X264asm/
-- https://wiki.videolan.org/X264_asm_intro/
