@@ -2,21 +2,17 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <time.h>
 
+// x264 defines
 typedef uint8_t pixel;
 typedef int16_t dctcoef;
 #define FENC_STRIDE 16
 #define FDEC_STRIDE 32
 #define PIXEL_MAX 255
 
-// clamps x between 0 and PIXEL_MAX 
-static pixel x264_clip_pixel( int x ) {
-    // ~ = bitwise NOT ( ~255 == -256)
-    // so (x & ~PIXEL_MAX) is true when x < 0 or x > 255
-    return ( (x & ~PIXEL_MAX) ? (-x)>>31 & PIXEL_MAX : x );
-}
-
-
+// line 154 of x264/common/x86/dct-a.asm
+// cglobal, cextern INIT_XMM macros from x264/common/x86/x86utils.asm or x264/common/x86/x86inc.asm 
 static void dct4x4dc( dctcoef d[16] )
 {
     dctcoef tmp[16];
@@ -48,11 +44,22 @@ static void dct4x4dc( dctcoef d[16] )
     }
 }
 
+void test_dct4x4dc(int iterations) {
+  dctcoef d[16];
+	struct timespec stime, etime;
+	clock_gettime(CLOCK_REALTIME, &stime);
+
+  for(int i = 0; i < iterations; i++) {
+    dct4x4dc(d);
+  }
+  
+	clock_gettime(CLOCK_REALTIME, &etime);
+  printf("time: %g\n", (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
+} 
 
 
 int main() {
-  int n = ~PIXEL_MAX;
-  int x = -10;
-
+  // Verkar som att vissa kommer köras en gång per pixel så många iterationer är inte helt irimligt
+  test_dct4x4dc(100000);
   return 0;
 }
