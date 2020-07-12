@@ -2,7 +2,6 @@
 
 ```
 git clone https://code.videolan.org/videolan/x264.git
-mkdir bin
 make
 ```
 

@@ -21,7 +21,6 @@ libx264:
 		--prefix="$(BUILD_PATH)" \
 		--extra-cflags="-c -Wno-unknown-warning-option -no-pie" \
 		--enable-gprof \
-		--extra-ldflags="-lpthread" \
 		--host=x86-none-linux \
 		--disable-cli \
 		--disable-thread \
@@ -32,7 +31,6 @@ libx264:
 		--bit-depth=8 \
 		--chroma-format=420 \
 		--disable-asm \
-		\
 		--disable-avs \
 		--disable-swscale \
 		--disable-lavf \
