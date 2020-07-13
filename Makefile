@@ -8,29 +8,38 @@
 
 BUILD_PATH = ./bin
 build: libx264
+BUILD_PATH = $$(pwd)/../bin
+MAN_PATH = $$(pwd)/../man
+PATH := $(PATH):$(PWD)/bin
+
 
 example:
-	gcc -I./x264/bin/include x264example.c ./x264/bin/lib/libx264.a -g -Wall -no-pie -p -pg -lm -o main
+	gcc -I./bin/include x264example.c ./bin/lib/libx264.a -pg -O3 -Wall -lm -o main
 
 test:
-	gcc -I./x264/bin/include test.c ./x264/bin/lib/libx264.a -Wall -pg -lm -o main
+	gcc -I./bin/include test.c ./bin/lib/libx264.a -Wall -lm -o main
+
+nasm: 
+	wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.bz2 && \
+	tar xjvf nasm-2.14.02.tar.bz2 && \
+	cd nasm-2.14.02 && \
+	./configure --bindir="$(BUILD_PATH)" --mandir="$(MAN_PATH)" && \
+	make && \
+	make install
 
 libx264:
 	cd ./x264 && \
 	./configure \
 		--prefix="$(BUILD_PATH)" \
-		--extra-cflags="-c -Wno-unknown-warning-option -no-pie" \
-		--enable-gprof \
-		--host=x86-none-linux \
+		--extra-cflags="-c -Wno-unknown-warning-option" \
 		--disable-cli \
+		--enable-gprof \
 		--disable-thread \
 		--enable-static \
-		--disable-shared \
 		--disable-opencl \
 		--disable-interlaced \
 		--bit-depth=8 \
 		--chroma-format=420 \
-		--disable-asm \
 		--disable-avs \
 		--disable-swscale \
 		--disable-lavf \

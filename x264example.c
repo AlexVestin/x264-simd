@@ -33,6 +33,7 @@
 #include <x264.h>
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 int main( int argc, char **argv )
@@ -90,6 +91,11 @@ int main( int argc, char **argv )
 
     const int nr_frames = 600;
     printf("Encoding %d frames\n", nr_frames);
+
+      
+    struct timespec stime, etime;
+    clock_gettime(CLOCK_REALTIME, &stime);
+
     for( i_frame = 0; i_frame < nr_frames; i_frame++ ) {
         /* Read input frame */
           size_t upos = image_size;
@@ -151,6 +157,10 @@ int main( int argc, char **argv )
 
     x264_encoder_close( h );
     x264_picture_clean( &pic );
+
+    
+    clock_gettime(CLOCK_REALTIME, &etime);
+    printf("\n Time: %g\n", (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
     printf("Exited cleanly\n");
     return 0;
 
@@ -161,6 +171,5 @@ fail2:
     x264_picture_clean( &pic );
 fail:
     return -1;
-
     
 }

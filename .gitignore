@@ -3,3 +3,6 @@ main
 x264/
 *.out
 *.gcda
+nasm-2.14.02/
+man/
+bin/
