@@ -14,7 +14,7 @@ PATH := $(PATH):$(PWD)/bin
 
 
 example:
-	gcc -I./bin/include x264example.c ./bin/lib/libx264.a -pg -O3 -Wall -lm -o main
+	gcc -I./bin/include x264example.c ./bin/lib/libx264.a -pg -Wall -lm -o main
 
 test:
 	gcc -I./bin/include test.c ./bin/lib/libx264.a -Wall -lm -o main
