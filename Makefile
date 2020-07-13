@@ -31,6 +31,7 @@ libx264:
 	cd ./x264 && \
 	./configure \
 		--prefix="$(BUILD_PATH)" \
+		--disable-gpl \
 		--extra-cflags="-c -Wno-unknown-warning-option" \
 		--disable-cli \
 		--enable-gprof \
