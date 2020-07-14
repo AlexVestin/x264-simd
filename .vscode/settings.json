@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "xiosbase": "c"
+    "xiosbase": "c",
+    "xlocale": "c"
   }
 }

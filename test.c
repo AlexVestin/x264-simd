@@ -45,11 +45,13 @@ static sum2_t abs2( sum2_t a )
   printf("\n"); \
 }
 
-static int x264_pixel_satd_8x8_2( pixel *pix1, intptr_t i_pix1, pixel *pix2, intptr_t i_pix2 ) {
+//uint8_t* had
+static int x264_pixel_satd_8x8_2(uint8_t* had /*pixel *pix1, intptr_t i_pix1, pixel *pix2, intptr_t i_pix2*/ ) {
 
   // Load the differences into the XMM registers
   __m128i _X[8], _B[8], _a, _b;
   for(int i = 0; i < 8; i++) {
+    #if 0
     uint8_t* pix1_ptr = &pix1[0] + i_pix1 * i;
     _a = _mm_load_si128((__m128i*) pix1_ptr);
     _a = _mm_cvtepi8_epi16(_a);
@@ -59,11 +61,21 @@ static int x264_pixel_satd_8x8_2( pixel *pix1, intptr_t i_pix1, pixel *pix2, int
     _b = _mm_cvtepi8_epi16(_b);
 
     _X[i] = _mm_sub_epi16(_a, _b);
+
+    //for(int j = 0; j < 8; j++) printf("%d,", *(pix1_ptr + j) - *(pix2_ptr + j));
+    //printf("\n");
+  
+    #else
+    _X[i] = _mm_cvtsi64_si128(*(const long*)&had[i*8]);//_mm_load_si128((__m128i*)had[i*8]);
+    _X[i] = _mm_cvtepi8_epi16(_X[i]);
+    //PRINT_VEC(_X[i]);
+    #endif
   }
+
 
   // --------------- Part B ---------------------
   int idx = 0;
-  for(int i = 0; i < 4;  i++) {
+  for(int i = 0; i < 4; i++) {
     idx = i*2;
     _B[idx]   = _mm_hadd_epi16(_X[idx], _X[idx+1]);
     _B[idx+1] = _mm_hsub_epi16(_X[idx], _X[idx+1]);
@@ -72,14 +84,12 @@ static int x264_pixel_satd_8x8_2( pixel *pix1, intptr_t i_pix1, pixel *pix2, int
   // count: 8
   // --------------- Part C ---------------------
   // X == C i figuren, går nog a förkorta ihop section 1 och 2
-  // section 1
   _X[0] = _mm_hadd_epi16(_B[0], _B[2]);
   _X[1] = _mm_hadd_epi16(_B[1], _B[3]);
   
   _X[2] = _mm_hsub_epi16(_B[0], _B[2]);
   _X[3] = _mm_hsub_epi16(_B[1], _B[3]);
 
-  // section 2
   _X[4] = _mm_hadd_epi16(_B[4], _B[6]);
   _X[5] = _mm_hadd_epi16(_B[5], _B[7]);
 
@@ -137,21 +147,36 @@ static int x264_pixel_satd_8x8_2( pixel *pix1, intptr_t i_pix1, pixel *pix2, int
   // count: 48
   // Hadamard done
   __m128i _res;
-  for(int i = 0; i < 8; i++) {
-    _X[i] = _mm_abs_epi16(_X[i]); 
-    _res  = _mm_add_epi16(_X[i], _res);
-  }
-
-  int16_t* result = (int16_t*)&_res;
   int sum = 0;
   for(int i = 0; i < 8; i++) {
+    PRINT_VEC(_X[i]);
+    _X[i] = _mm_abs_epi16(_X[i]); 
+    _res  = _mm_add_epi16(_X[i], _res);
+  } 
+  
+  /*__m128i _res32[4];
+  for (int i = 0; i < 4; i++) {
+    _res32[i] = _mm_madd_epi16(_X[i*2], _X[i*2+1]);
+    printf("32bit...\n");
+    for(int j = 0; j < 4; j++) printf("%d ", *((int32_t*)&_res32 + j));
+    printf("\nend");
+  }*/
+
+
+  
+  
+  int16_t* result = (int16_t*)&_res;
+  
+  for (int i = 0; i < 8; i++) {
     printf("%d\n", result[i]);
     sum += result[i];
   }
 
-  printf("sum: %d\n", sum);
+
+  printf("sum: %d\n", sum >> 1);
   return sum;
 }
+
 
 
 
@@ -174,109 +199,23 @@ static int x264_pixel_satd_8x4_slow( pixel *pix1, intptr_t i_pix1, pixel *pix2, 
     for( int i = 0; i < 4; i++ )
     {
         HADAMARD4( a0, a1, a2, a3, tmp[0][i], tmp[1][i], tmp[2][i], tmp[3][i] );
-        //printf("slow a: %d %d %d %d %d %d %d %d\n", a0, a1, a2, a3, abs2(a0), abs2(a1), abs2(a2), abs2(a3));
+        int s0 = abs2(a0);
+        int s1 = abs2(a1);
+        int s2 = abs2(a2);
+        int s3 = abs2(a3);
+        
+        printf("s0 %d %d\n", (sum_t)s0, s0>>BITS_PER_SUM); 
+        printf("s1 %d %d\n", (sum_t)s1, s1>>BITS_PER_SUM); 
+        printf("s2 %d %d\n", (sum_t)s2, s2>>BITS_PER_SUM); 
+        printf("s3 %d %d\n", (sum_t)s3, s3>>BITS_PER_SUM); 
+
         int psum = abs2(a0) + abs2(a1) + abs2(a2) + abs2(a3);
-
-        int t0 = (sum_t)psum;
-        int t1 = psum>>BITS_PER_SUM;
-        printf("%d + %d >> 1 = %d\n", t0, t1, (t0 + t1) >> 1);
-
+        printf("%d \n", (((sum_t)psum) + (psum>>BITS_PER_SUM)) >> 1); 
         sum += psum;
     }
-    int s = (((sum_t)sum) + (sum>>BITS_PER_SUM)) >> 1;
-    printf("block sum = %d\n", s);
-    return s;
-}
-
-
-
-static int x264_pixel_satd_8x8( pixel *pix1, intptr_t i_pix1, pixel *pix2, intptr_t i_pix2 )
-{
-    sum2_t sum = 0;
-    __m128i _v11, _v21, _a1, _a2, _b1, _b2, _c1, _c2, _d1, _d2, _res;
-    __m128i _tmp[4];
-
-    for( int i = 0; i < 4; i++, pix1 += i_pix1, pix2 += i_pix2 ) {
-        // https://stackoverflow.com/questions/12121640/how-to-load-a-pixel-struct-into-an-sse-register
-        // load 8 values
-        _a1 = _mm_load_si128((__m128i*)&pix1[0]);
-        _a2 = _mm_load_si128((__m128i*)&pix2[0]);
-
-        _a1 = _mm_cvtepi8_epi16(_a1);
-        _a2 = _mm_cvtepi8_epi16(_a2);
-
-        // http://www.apsipa.org/proceedings_2012/papers/201.pdf
-        _b1 = _mm_hadd_epi16(_a1, _a2);
-        _b2 = _mm_hsub_epi16(_a1, _a2);
-
-        _c1 = _mm_hadd_epi16(_b1, _b2);
-        _c2 = _mm_hsub_epi16(_b1, _b2);
-
-        _d1 = _mm_hadd_epi16(_c1, _c2);
-        _d2 = _mm_hsub_epi16(_c1, _c2);
-
-        _res = _mm_hadd_epi32(_d1, _d2);
-        // abs it up
-        _res = _mm_abs_epi32(_res);
-        for (int j = 0; j < 4; j++) {
-          sum += *((sum2_t*)&_res + i);
-        }    
-    }
-    printf("sum: %d \n", sum);
     return (((sum_t)sum) + (sum>>BITS_PER_SUM)) >> 1;
 }
- 
-static int x264_pixel_satd_8x4( pixel *pix1, intptr_t i_pix1, pixel *pix2, intptr_t i_pix2 )
-{
-    // sum2_t tmp[4][4];
-    // sum2_t a0, a1, a2, a3;
-    sum2_t sum = 0;
 
-    __m128i _v11, _v21, _a1, _a2, _res;
-    __m128i _tmp[4];
-
-    for( int i = 0; i < 4; i++, pix1 += i_pix1, pix2 += i_pix2 )
-    {
-
-        // https://stackoverflow.com/questions/12121640/how-to-load-a-pixel-struct-into-an-sse-register
-        // load 8 values
-        _v11 = _mm_load_si128((__m128i*)&pix1[0]);
-        _v21 = _mm_load_si128((__m128i*)&pix2[0]);
-        
-        // subtract
-        _a1 = _mm_sub_epi8(_v11, _v21);
-        
-        // extend to int16
-        _a1 = _mm_cvtepi8_epi16(_a1);
-
-        // shift the values
-        _a2 = _mm_srli_si128(_a1, 8);
-        
-        // Extend to 32 bit values
-        _a2 = _mm_cvtepi16_epi32(_a2);
-        
-        // Shift each value left BITS_PER_SUM
-        _a2 = _mm_slli_epi32(_a2, BITS_PER_SUM);
-
-        // Convert left to 32 bit
-        _a1 = _mm_cvtepi16_epi32(_a1);
-
-        // add them together
-        _res = _mm_add_epi32(_a1, _a2);
-
-        //printf("fast: %d %d %d %d \n", *((sum2_t*)&_a + 0), *((sum2_t*)&_a + 1), *((sum2_t*)&_a + 2), *((sum2_t*)&_a + 3));
-    
-        HADAMARD4SIMD( _tmp, _res );        
-    }
-    /*
-    for( int i = 0; i < 4; i++ )
-    {
-        HADAMARD4SIMD( a0, a1, a2, a3, tmp[0][i], tmp[1][i], tmp[2][i], tmp[3][i] );
-        sum += abs2(a0) + abs2(a1) + abs2(a2) + abs2(a3);
-    }
-    */
-    return (((sum_t)sum) + (sum>>BITS_PER_SUM)) >> 1;
-}
 
 
 int main() {
@@ -289,16 +228,30 @@ int main() {
   const int i_pix2 = 16;
 
   for(int i = 0; i < SIZE; i++) {
-    pix1[i] = (1. + sinf((double)(i*12.) / 100.)) * (i%3) * 4;
-    pix2[i] = (i + 10) % 16;//i%8 * 2;
+    pix1[i] = 90 + i % 20;//(1. + sinf((double)(i*12.) / 100.)) * (i%3) * 4;
+    pix2[i] = 10 + i % 16;//i%8 * 2;
   }
 
 
-  x264_pixel_satd_8x8_2(pix1, i_pix1, pix2, i_pix2);
-  
-  int top = x264_pixel_satd_8x4_slow(pix1, i_pix1, pix2, i_pix2);
+  uint8_t had[64] = {
+    1,3,-1,2,4,5,20,1,
+    9,1,20,88,1,8,2,12,
+    0,0,0,0,0,3,0,0,
+    0,0,0,0,4,0,0,0,
+    0,0,0,5,0,0,0,0,
+    0,0,6,0,0,0,0,0,
+    0,7,0,0,0,0,0,0,
+    8,0,0,0,0,0,0,0
+  };
+
+    
+  /*int top = x264_pixel_satd_8x4_slow(pix1, i_pix1, pix2, i_pix2);
   int bottom = x264_pixel_satd_8x4_slow(pix1+4*i_pix1, i_pix1, pix2+4*i_pix2, i_pix2);
   printf("sum2: %d\n", top + bottom);
+  */
+
+  x264_pixel_satd_8x8_2(had);
+
 
 
   
@@ -315,8 +268,7 @@ int main() {
   }
   printf("\n");
 
-  clock_gettime(CLOCK_REALTIME, &etime);
-  printf("Time1: %g\n", (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
+  
   
   clock_gettime(CLOCK_REALTIME, &stime);
   for( int i = 0; i < iterations; i++) {
