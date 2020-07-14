@@ -37,3 +37,5 @@ kör ouputen och sedan `gprof main gmon.out > profile`
 - https://eiken.dev/blog/2020/04/optimizing-the-walsh-hadamard-transform-using-simd-intrinsics/
 - https://mailman.videolan.org/pipermail/x264-devel/attachments/20130423/ffd6bfb6/attachment-0001.pdf
 - https://www.researchgate.net/publication/4222524_Introduction_to_H264_advanced_video_coding
+- https://www.researchgate.net/profile/Daniel_Lun/publication/220598752_Improved_SIMD_Architecture_for_High_Performance_Video_Processors/links/5498d1cf0cf2519f5a1dea03/Improved-SIMD-Architecture-for-High-Performance-Video-Processors.pdf
+- https://pdfs.semanticscholar.org/9942/1f78e7f0c0dbfaaedf6c73d3bf9c3bea18fc.pdf
