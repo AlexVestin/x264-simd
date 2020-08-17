@@ -38,7 +38,7 @@
 
 int main( int argc, char **argv )
 {
-    int width = 256, height = 256;
+    int width = 1280, height = 720;
     x264_param_t param;
     x264_picture_t pic;
     x264_picture_t pic_out;
@@ -89,14 +89,18 @@ int main( int argc, char **argv )
     int lidx;
     size_t image_size = width * height;
 
-    const int nr_frames = 600;
+    const int nr_frames = 200;
     printf("Encoding %d frames\n", nr_frames);
 
-      
     struct timespec stime, etime;
     clock_gettime(CLOCK_REALTIME, &stime);
 
     for( i_frame = 0; i_frame < nr_frames; i_frame++ ) {
+
+      if(i_frame > 0 && !(i_frame % 100)) {
+          clock_gettime(CLOCK_REALTIME, &etime);
+          printf("%d frames encoded, time elapsed: %g \n", i_frame, (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
+      }
         /* Read input frame */
           size_t upos = image_size;
           size_t vpos = upos + upos / 4;

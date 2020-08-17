@@ -1,36 +1,48 @@
-### bygg
+### build
 
 ```
 git clone https://code.videolan.org/videolan/x264.git
 make
 ```
 
-### x264 exempel
+### threads
+
+in `x264/encoder/slicetype.c`
+`static void slicetype_slice_cost( x264_slicetype_slice_t *s )`
+->
+`static void* slicetype_slice_cost( x264_slicetype_slice_t \*s )`
+
+&&
+
+in `x264/common/cpu.c`
+`#ifdef __EMSCRIPTEN__` -> #include <emscripten.h>
+
+return emscripten_num_logical_cores();
+
+### x264 example
 
 ```
 make example && ./main
-ffplay output.h264 (ska bara bli rödaktiga fyrkanter)
+ffplay output.h264
 ```
 
 ### run SIMD test function
 
 `make test && ./main`
 
-### generellt
+### Generally
 
-Mesta av SIMDen som hittas finns i block av `if( cpu&X264_CPU_SSE`, såg går att `ctrl+shift+f`a det
+Most of the SIMD in `if( cpu&X264_CPU_SSE` ...
 
 https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=SSE2,SSE3,SSSE3,SSE4_1,AVX
-Assembler variant i grått till höger i kolumnen,
 
-emscripten stöder bara officiellt SSE1 & SSE2 än så länge (https://emscripten.org/docs/porting/simd.html#compiling-simd-code-targeting-x86-sse-instruction-set), men har implementerat SSE4.2 och AVX 128bit https://github.com/emscripten-core/emscripten/pull/11327
+emscripten/wasm generally only supports SSE1 & SSE2 instructionss (https://emscripten.org/docs/porting/simd.html#compiling-simd-code-targeting-x86-sse-instruction-set), and some emulated instructions up to AVX https://github.com/emscripten-core/emscripten/pull/11327
 
 ### profile
 
-bygg med -pg och --enable-gprof till x264 (kanske -no-pie -fno-pie beroende på om man får output)
-kör ouputen och sedan `gprof main gmon.out > profile`
+build with -pg and --enable-gprof for x264 (maybe -no-pie/-fno-pie)
 
-### länkar
+### links
 
 - https://wiki.videolan.org/X264_asm_intro/ ( https://wiki.videolan.org/X264asm/ )
 - http://www.apsipa.org/proceedings_2012/papers/201.pdf

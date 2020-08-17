@@ -1,6 +1,9 @@
 {
   "files.associations": {
     "xiosbase": "c",
-    "xlocale": "c"
+    "xlocale": "c",
+    "system_error": "c",
+    "chrono": "c",
+    "cstdlib": "c"
   }
 }
