@@ -1,0 +1,40 @@
+diff --git a/common/cpu.c b/common/cpu.c
+index 96585aa8..578c50ca 100644
+--- a/common/cpu.c
++++ b/common/cpu.c
+@@ -440,6 +440,9 @@ int x264_cpu_num_processors( void )
+ #ifdef __ANDROID__
+     // Android NDK does not expose sched_getaffinity
+     return sysconf( _SC_NPROCESSORS_CONF );
++#elif __EMSCRIPTEN__
++    #include <emscripten/threading.h>
++    return emscripten_num_logical_cores();
+ #else
+     cpu_set_t p_aff;
+     memset( &p_aff, 0, sizeof(p_aff) );
+diff --git a/configure b/configure
+index e41664cd..894127c3 100755
+--- a/configure
++++ b/configure
+@@ -1613,7 +1613,7 @@ Libs.private: $([ "$shared" = "yes" ] && echo $libpthread $libm $libdl)
+ Cflags: -I$includedir $([ "$shared" = "yes" ] && echo "-DX264_API_IMPORTS")
+ EOF
+ 
+-filters="crop select_every"
++filters=""
+ [ $swscale = yes ] && filters="resize $filters"
+ 
+ cat > conftest.log <<EOF
+diff --git a/encoder/slicetype.c b/encoder/slicetype.c
+index 0315ba6b..c2acb3f0 100644
+--- a/encoder/slicetype.c
++++ b/encoder/slicetype.c
+@@ -811,7 +811,7 @@ typedef struct
+     int *output_intra;
+ } x264_slicetype_slice_t;
+ 
+-static void slicetype_slice_cost( x264_slicetype_slice_t *s )
++static void* slicetype_slice_cost( x264_slicetype_slice_t *s )
+ {
+     x264_t *h = s->h;
+ 

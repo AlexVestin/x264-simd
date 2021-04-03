@@ -4,6 +4,15 @@
     "xlocale": "c",
     "system_error": "c",
     "chrono": "c",
-    "cstdlib": "c"
+    "cstdlib": "c",
+    "array": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "ranges": "c",
+    "utility": "c",
+    "valarray": "c",
+    "atomic": "c",
+    "memory_resource": "c",
+    "stop_token": "c"
   }
 }

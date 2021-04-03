@@ -1,5 +1,6 @@
 *.h264
 main*
+index*
 x264/
 *.out
 *.o
@@ -7,4 +8,5 @@ x264/
 nasm-2.14.02/
 man/
 bin/
+build/
 copy_x264

@@ -38,7 +38,7 @@
 
 int main( int argc, char **argv )
 {
-    int width = 1280, height = 720;
+    int width = 1920, height = 1080;
     x264_param_t param;
     x264_picture_t pic;
     x264_picture_t pic_out;
@@ -66,6 +66,9 @@ int main( int argc, char **argv )
     param.b_repeat_headers = 1;
     param.b_annexb = 1;
 
+    printf("threads %d %d\n", param.i_threads, param.b_sliced_threads);
+    
+
     /* Apply profile restrictions. */
     if( x264_param_apply_profile( &param, "high" ) < 0 )
         goto fail;
@@ -92,12 +95,14 @@ int main( int argc, char **argv )
     const int nr_frames = 200;
     printf("Encoding %d frames\n", nr_frames);
 
-    struct timespec stime, etime;
+    struct timespec stime, etime, encstime, encetime;
     clock_gettime(CLOCK_REALTIME, &stime);
+
+    double total_time = 0;
 
     for( i_frame = 0; i_frame < nr_frames; i_frame++ ) {
 
-      if(i_frame > 0 && !(i_frame % 100)) {
+      if(i_frame > 0 && !(i_frame % 50)) {
           clock_gettime(CLOCK_REALTIME, &etime);
           printf("%d frames encoded, time elapsed: %g \n", i_frame, (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
       }
@@ -108,7 +113,8 @@ int main( int argc, char **argv )
           uint8_t r, g, b;
           cidx = 0;
           lidx = 0;
-
+        
+        
           for( size_t line = 0; line < height; ++line ) {
         
               if( !(line % 2) ) {
@@ -135,10 +141,16 @@ int main( int argc, char **argv )
                   }
               }
           }  
+          
       
 
         pic.i_pts = i_frame;
+        clock_gettime(CLOCK_REALTIME, &encstime);
         i_frame_size = x264_encoder_encode( h, &nal, &i_nal, &pic, &pic_out );
+        clock_gettime(CLOCK_REALTIME, &encetime);
+        double diff = (encetime.tv_sec  - encstime.tv_sec) + 1e-9*(encetime.tv_nsec  - encstime.tv_nsec);
+        total_time += diff;
+
         if( i_frame_size < 0 ) {
           goto fail;
         } else if( i_frame_size ) {
@@ -165,6 +177,7 @@ int main( int argc, char **argv )
     
     clock_gettime(CLOCK_REALTIME, &etime);
     printf("\n Time: %g\n", (etime.tv_sec  - stime.tv_sec) + 1e-9*(etime.tv_nsec  - stime.tv_nsec));
+    printf("Encode time: %f\n", total_time);
     printf("Exited cleanly\n");
     return 0;
 

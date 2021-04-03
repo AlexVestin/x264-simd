@@ -7,6 +7,8 @@ git clone https://code.videolan.org/videolan/x264.git
 make
 ```
 
+Needs `nasm` for native builds with assembly and `emcc` for wasm builds.
+
 ### threads
 
 in `x264/encoder/slicetype.c`
