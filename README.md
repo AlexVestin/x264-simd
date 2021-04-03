@@ -1,3 +1,5 @@
+x264 has optimised SIMD code for exporting. This repo is an attempt to port some of the SIMD code, which is written in assembly, to C intrinsics, so it can be used with WebAssembly.
+
 ### build
 
 ```
