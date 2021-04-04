@@ -1,4 +1,4 @@
-This repo is an attempt to port some of the SIMD code, written in assembly to C intrinsics, to be used with WebAssembly. 
+This repo is an attempt to port some of the SIMD code written in assembly to C intrinsics, to be used with WebAssembly. 
 
 
 ### build
