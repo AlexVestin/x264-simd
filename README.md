@@ -1,46 +1,25 @@
-x264 has optimised SIMD code for exporting. This repo is an attempt to port some of the SIMD code, which is written in assembly, to C intrinsics, so it can be used with WebAssembly.
+This repo is an attempt to port some of the SIMD code, written in assembly to C intrinsics, to be used with WebAssembly. 
+
 
 ### build
 
 ```
-git clone https://code.videolan.org/videolan/x264.git
-make
+git clone --depth 1 https://github.com/AlexVestin/x264-wasm
+make wasm-libx264-simd
 ```
 
-Needs `nasm` for native builds with assembly and `emcc` for wasm builds.
+Needs `nasm` (there's a target for this in the Makefile) for native builds with assembly, and `emsdk` for wasm builds.
 
-### threads
 
-in `x264/encoder/slicetype.c`
-`static void slicetype_slice_cost( x264_slicetype_slice_t *s )`
-->
-`static void* slicetype_slice_cost( x264_slicetype_slice_t \*s )`
-
-&&
-
-in `x264/common/cpu.c`
-`#ifdef __EMSCRIPTEN__` -> #include <emscripten.h>
-
-return emscripten_num_logical_cores();
-
-### x264 example
-
-```
-make example && ./main
-ffplay output.h264
-```
-
-### run SIMD test function
-
-`make test && ./main`
+### Results
+Substituting only the SAD, and SATD 8x8 function (the 4x4 is already very optimized) with SIMD code there was around a 1.6x speedup running a very hastily made benchmark. 
+ 
 
 ### Generally
 
-Most of the SIMD in `if( cpu&X264_CPU_SSE` ...
-
 https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=SSE2,SSE3,SSSE3,SSE4_1,AVX
 
-emscripten/wasm generally only supports SSE1 & SSE2 instructionss (https://emscripten.org/docs/porting/simd.html#compiling-simd-code-targeting-x86-sse-instruction-set), and some emulated instructions up to AVX https://github.com/emscripten-core/emscripten/pull/11327
+emscripten/wasm generally only supports SSE1 & SSE2 instructionss (https://emscripten.org/docs/porting/simd.html#compiling-simd-code-targeting-x86-sse-instruction-set), and some emulated instructions up to AVX
 
 ### profile
 

@@ -65,8 +65,6 @@ int main( int argc, char **argv )
     param.b_vfr_input = 0;
     param.b_repeat_headers = 1;
     param.b_annexb = 1;
-
-    printf("threads %d %d\n", param.i_threads, param.b_sliced_threads);
     
 
     /* Apply profile restrictions. */
@@ -92,7 +90,7 @@ int main( int argc, char **argv )
     int lidx;
     size_t image_size = width * height;
 
-    const int nr_frames = 200;
+    const int nr_frames = 400;
     printf("Encoding %d frames\n", nr_frames);
 
     struct timespec stime, etime, encstime, encetime;

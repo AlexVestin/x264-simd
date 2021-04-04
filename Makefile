@@ -30,20 +30,13 @@ LIBX_SETTINGS = \
 WASM_LIBX_SETTINGS=$(LIBX_SETTINGS) --disable-asm --host=x86-none-linux
 
 example:
-	gcc -I./build/include x264example.c $(BUILD_DIR)/lib/libx264.a -msse4 -O3 -fno-tree-vectorize -pthread -Wall -lm -o main
+	gcc -I./build/include x264example.c $(BUILD_DIR)/lib/libx264.a -msse4 -O3 -pthread -Wall -lm -o main
 
 wasm-example:
-	emcc -I$(WASM_BUILD_DIR)/include x264example.c $(WASM_BUILD_DIR)/lib/libx264.a -O3  -s PROXY_TO_PTHREAD -s PTHREAD_POOL_SIZE=10 -s ALLOW_MEMORY_GROWTH=1 -pthread  -Wall -lm -o index.html
-
-test:
-	nasm -f elf64 -DARCH_X86_64=1 -DSTACK_ALIGNMENT=64 hadamard_a.asm -o had.o && \
-	gcc smol_satd.c had.o -msse4 -O3 -no-pie -fno-tree-vectorize -lm -o main
-
-wasm-test:
-	emcc test.c -pthread -msse4.1 -msimd128 -Wall -lm -o main.html
+	emcc -I$(WASM_BUILD_DIR)/include x264example.c $(WASM_BUILD_DIR)/lib/libx264.a -O3 -s PROXY_TO_PTHREAD -s PTHREAD_POOL_SIZE=10 -s ALLOW_MEMORY_GROWTH=1 -pthread  -Wall -lm -o index.html
 
 # nasm build
-nasm: 
+build-nasm: 
 	wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.bz2 && \
 	tar xjvf nasm-2.14.02.tar.bz2 && \
 	cd nasm-2.14.02 && \
@@ -55,7 +48,7 @@ nasm:
 wasm-libx264:
 	cd ./x264 && \
 	emconfigure ./configure $(WASM_INSTALLS) \
-		--extra-cflags="-c -Wno-unknown-warning-option" \
+		--extra-cflags="-pthread -c" \
 		$(WASM_LIBX_SETTINGS) && \
 	emmake make -j8 && \
 	emmake make install
@@ -64,7 +57,7 @@ wasm-libx264:
 wasm-libx264-simd:
 	cd ./x264 && \
 	emconfigure ./configure $(WASM_INSTALLS) \
-		--extra-cflags="-pthread -c -Wno-unknown-warning-option -msse4.1 -msimd128" \
+		--extra-cflags="-pthread -c -msse4.1 -msimd128" \
 		$(WASM_LIBX_SETTINGS) && \
 	emmake make -j8 && \
 	emmake make install
