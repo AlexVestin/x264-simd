@@ -10,3 +10,4 @@ man/
 bin/
 build/
 copy_x264
+node_modules/

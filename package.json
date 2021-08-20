@@ -1,0 +1,23 @@
+{
+  "name": "x264-simd",
+  "version": "1.0.0",
+  "description": "This repo is an attempt to port some of the SIMD code written in assembly to C intrinsics, to be used with WebAssembly.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexVestin/x264-simd.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexVestin/x264-simd/issues"
+  },
+  "homepage": "https://github.com/AlexVestin/x264-simd#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

@@ -33,7 +33,7 @@ example:
 	gcc -I./build/include x264example.c $(BUILD_DIR)/lib/libx264.a -msse4 -O3 -pthread -Wall -lm -o main
 
 wasm-example:
-	emcc -I$(WASM_BUILD_DIR)/include x264example.c $(WASM_BUILD_DIR)/lib/libx264.a -O3 -s PROXY_TO_PTHREAD -s PTHREAD_POOL_SIZE=10 -s ALLOW_MEMORY_GROWTH=1 -pthread  -Wall -lm -o index.html
+	emcc -I$(WASM_BUILD_DIR)/include x264example.c $(WASM_BUILD_DIR)/lib/libx264.a -msse4.1 -msimd128 -O3 -s PROXY_TO_PTHREAD -s PTHREAD_POOL_SIZE=10 -s INITIAL_MEMORY=1024MB -pthread  -Wall -lm -o index.html
 
 # nasm build
 build-nasm: 
@@ -48,7 +48,7 @@ build-nasm:
 wasm-libx264:
 	cd ./x264 && \
 	emconfigure ./configure $(WASM_INSTALLS) \
-		--extra-cflags="-pthread -c" \
+		--extra-cflags="-pthread -c -msse4.1 -msimd128" \
 		$(WASM_LIBX_SETTINGS) && \
 	emmake make -j8 && \
 	emmake make install

@@ -4,7 +4,8 @@ This repo is an attempt to port some of the SIMD code written in assembly to C i
 ### build
 
 ```
-git clone --depth 1 https://github.com/AlexVestin/x264-wasm
+git clone --depth 1 https://github.com/AlexVestin/x264-wasm x264
+mkdir build
 make wasm-libx264-simd
 ```
 
