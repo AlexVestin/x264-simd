@@ -13,6 +13,7 @@
     "valarray": "c",
     "atomic": "c",
     "memory_resource": "c",
-    "stop_token": "c"
+    "stop_token": "c",
+    "predict.h": "c"
   }
 }
